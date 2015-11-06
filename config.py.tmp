@@ -1,0 +1,4 @@
+__author__ = 'tz3'
+RESULT_PATH = '../result/'
+ORIGIN_IMAGE = '../assets/origin.jpg'
+HAARCASCADE = '../assets/haarcascade_frontalface_alt.xml'
