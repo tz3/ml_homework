@@ -1,5 +1,7 @@
 import cv2
+
 import config
+
 faceCascade = cv2.CascadeClassifier(config.HAARCASCADE)
 
 
@@ -18,12 +20,20 @@ def detect(image):
 
 if __name__ == "__main__":
     cam = cv2.VideoCapture(0)
+    w = int(cam.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
+    h = int(cam.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
+    # video doesn't play
+    out = cv2.VideoWriter(config.result_path("output.mp4"), -1, 25,
+                          (w, h))
     while 1:
         _, frame = cam.read()
         frame = detect(frame)
+        if cam.isOpened():
+            out.write(frame)
         cv2.imshow('Video', frame)
         if cv2.waitKey(1) == 0x1b:  # ESC
             print 'ESC pressed. Exiting ...'
-            cam.release()
-            cv2.destroyAllWindows()
             break
+    cam.release()
+    out.release()
+    cv2.destroyAllWindows()
