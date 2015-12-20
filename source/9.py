@@ -1,9 +1,8 @@
 # import cv2
 from cv2 import *
-
 from cv2.cv import fromarray
 
-image = imread('2.jpg')
+image = imread('../assets/2.jpg')
 img_rsz = resize(image, (0, 0), fx=2, fy=2)
 hog = HOGDescriptor()
 hog.setSVMDetector(HOGDescriptor_getDefaultPeopleDetector())
