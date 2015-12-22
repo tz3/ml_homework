@@ -1,18 +1,19 @@
+import numpy as np
 import os
 
 import cv2
-from numpy.random import random
+import random
 
 
 class BOWClassifier(object):
     def __init__(self, detector_type, descriptor_type, voc_size):
-        self.detector = cv2.FeatureDetector_create(10, True, detector_type)
+        self.detector = cv2.FeatureDetector_create(detector_type)
         self.descriptor_extractor = cv2.DescriptorExtractor_create(descriptor_type)
         self.voc_size = voc_size
         self.classifier = None
         self.vocabulary = None
         self.bow_detector = cv2.BOWImgDescriptorExtractor(
-            self.descriptor_extractor, cv2.DescriptorMatcher_create(descriptor_type)
+            self.descriptor_extractor, cv2.DescriptorMatcher_create("BruteForce")
         )
         self.classes = []
 
@@ -20,6 +21,7 @@ class BOWClassifier(object):
         pass
 
     def train_vocabulary(self, images, is_voc):
+        print "train voc"
         train_imgs = get_set(images, is_voc, True)
         trainer = cv2.BOWKMeansTrainer(self.voc_size)
         for img in train_imgs:
@@ -27,7 +29,6 @@ class BOWClassifier(object):
             features = self.detector.detect(matrix)
             _, des = self.descriptor_extractor.compute(matrix, features)
             trainer.add(des)
-        trainer.cluster()
         self.bow_detector.setVocabulary(trainer.cluster())
 
     def train(self, images, classes, is_train):
@@ -41,8 +42,8 @@ class BOWClassifier(object):
         for i, img in enumerate(train_images):
             image = cv2.imread(img)
             features = self.detector.detect(image)
-            _, des = self.bow_detector.compute(features)
-            train_data[i] = des
+            des = self.bow_detector.compute(image, features)
+            train_data.append(des)
         return train_data, get_set(responses, is_train, True)
 
     def train_rtree(self, train_data, train_responses):
@@ -53,9 +54,12 @@ class BOWClassifier(object):
                             max_num_of_trees_in_the_forest=200,
                             term_crit=(cv2.TERM_CRITERIA_MAX_ITER, 1000, 1)
                             )
+        traind = np.array(train_data)
+        trainr = np.array(train_responses)
+        print traind
         rtree.train(
-            train_data, cv2.CV_ROW_SAMPLE,
-            train_responses, params=rtree_params
+            traind, cv2.CV_ROW_SAMPLE,
+            trainr, params=rtree_params
         )
         self.classifier = rtree
 
@@ -113,9 +117,10 @@ def calculate_missclassification(responses, predictions, total):
 
 
 if __name__ == '__main__':
-    classifier = BOWClassifier("SIFT", "SIFT", 25)
+    classifier = BOWClassifier("SIFT", "SIFT", 2)
     files, classes = get_files_in_folder("/home/blvp/Downloads/101_ObjectCategories")
     is_train_random = init_random_bool_vector(len(files), 0.5)
+    print len(is_train_random) , "size of data set"
     classifier.train(files, classes, is_train_random)
     predictions = predict_on_test_data(classifier, files, is_train_random)
     responses_test = get_set(classes, is_train_random, False)
