@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from scipy.cluster.vq import *
 
-dir = "/Users/rinatahmetov/Downloads/101_ObjectCategories"
+folder = "/Users/rinatahmetov/Downloads/101_ObjectCategories"
 
 
 def get_files_in_folder(dir_path):
@@ -17,8 +17,8 @@ def get_files_in_folder(dir_path):
     image_classes = []
     class_id = 0
     for training_name in training_names:
-        dir = os.path.join(dir_path, training_name)
-        class_path = [x for x in os.listdir(dir) if x.endswith('.jpg')]
+        folder = os.path.join(dir_path, training_name)
+        class_path = [os.path.join(folder, x) for x in os.listdir(folder) if x.endswith('.jpg')]
         image_paths += class_path
         image_classes += [class_id] * len(class_path)  # ?????
         class_id += 1
@@ -44,7 +44,10 @@ def train_vocabulary(file_list, voc_size, keypoint_detector="SIFT", d_extrator="
         bow_mt.add(image, des)
     return bow_mt
 
-images = get_files_in_folder(dir)
+def extract_features_from_image(feature_detector, bow_extractor, file_name):
+    pass
+
+images = get_files_in_folder(folder)
 bool_vec = init_random_bool_vector(len(images), 0.5)
 print bool_vec
 train_set = get_set(images, bool_vec)
