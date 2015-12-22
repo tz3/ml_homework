@@ -3,8 +3,6 @@ import os
 import random
 
 import cv2
-import numpy as np
-from scipy.cluster.vq import *
 
 folder = "/Users/rinatahmetov/Downloads/101_ObjectCategories"
 
@@ -52,9 +50,21 @@ def extract_features_from_image(detector, bow_extractor, img):
     return desc
 
 
+def train_classifier(train_data, train_responses):
+    classifier = cv2.RTrees()
+    rtree_params = dict(max_depth=11, min_sample_count=5,
+                        use_surrogates=False, max_categories=15,
+                        calc_var_importance=False, nactive_vars=0,
+                        max_num_of_trees_in_the_forest=200,
+                        term_crit=(cv2.TERM_CRITERIA_MAX_ITER, 1000, 1)
+                        )
+    return classifier.train(
+        train_data, cv2.CV_ROW_SAMPLE,
+        train_responses, params=rtree_params)
+
+
 images = get_files_in_folder(folder)
 bool_vec = init_random_bool_vector(len(images), 0.5)
 print bool_vec
 train_set = get_set(images, bool_vec)
 print train_set
-
