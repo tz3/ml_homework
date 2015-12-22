@@ -44,8 +44,13 @@ def train_vocabulary(file_list, voc_size, keypoint_detector="SIFT", d_extrator="
         bow_mt.add(image, des)
     return bow_mt
 
-def extract_features_from_image(feature_detector, bow_extractor, file_name):
-    pass
+
+def extract_features_from_image(detector, bow_extractor, img):
+    image = cv2.imread(img)
+    features = detector.detect(image)
+    _, desc = bow_extractor.compute(features)
+    return desc
+
 
 images = get_files_in_folder(folder)
 bool_vec = init_random_bool_vector(len(images), 0.5)
