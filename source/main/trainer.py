@@ -63,6 +63,18 @@ def train_classifier(train_data, train_responses):
         train_responses, params=rtree_params)
 
 
+def extract_train_data(images, is_train, responses, fea_detector, bow_extractor):
+    train_images = get_set(images, is_train, True)
+    train_data = []
+    for i, img in enumerate(train_images):
+        image = cv2.imread(img)
+        features = fea_detector.detect(image)
+        _, des = bow_extractor.compute(features)
+        train_data[i] = des
+
+    return train_data, get_set(responses, is_train, True)
+
+
 images = get_files_in_folder(folder)
 bool_vec = init_random_bool_vector(len(images), 0.5)
 print bool_vec
