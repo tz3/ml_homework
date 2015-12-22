@@ -1,7 +1,6 @@
 # bag of words
 import os
 import random
-
 import cv2
 
 folder = "/Users/rinatahmetov/Downloads/101_ObjectCategories"
@@ -20,7 +19,7 @@ def get_files_in_folder(dir_path):
         image_paths += class_path
         image_classes += [class_id] * len(class_path)  # ?????
         class_id += 1
-    return image_paths
+    return image_paths, image_classes
 
 
 def init_random_bool_vector(mass_length, prob):
@@ -58,9 +57,12 @@ def train_classifier(train_data, train_responses):
                         max_num_of_trees_in_the_forest=200,
                         term_crit=(cv2.TERM_CRITERIA_MAX_ITER, 1000, 1)
                         )
-    return classifier.train(
+    classifier.train(
         train_data, cv2.CV_ROW_SAMPLE,
-        train_responses, params=rtree_params)
+        train_responses, params=rtree_params
+    )
+
+    return classifier
 
 
 def extract_train_data(images, is_train, responses, fea_detector, bow_extractor):
@@ -75,8 +77,16 @@ def extract_train_data(images, is_train, responses, fea_detector, bow_extractor)
     return train_data, get_set(responses, is_train, True)
 
 
-images = get_files_in_folder(folder)
+images, classes = get_files_in_folder(folder)
 bool_vec = init_random_bool_vector(len(images), 0.5)
 print bool_vec
 train_set = get_set(images, bool_vec)
 print train_set
+
+fea_det = cv2.FeatureDetector_create("SIFT")
+des_ext = cv2.DescriptorExtractor_create("SIFT")
+bow = cv2.BOWImgDescriptorExtractor(des_ext, None)
+
+train_data, train_responses = extract_train_data(images, bool_vec, classes, fea_det, bow)
+classifier = train_classifier(train_data, train_responses)
+print classifier
