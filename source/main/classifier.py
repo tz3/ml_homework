@@ -38,12 +38,12 @@ class BOWClassifier(object):
 
     def extract_train_data(self, images, is_train, responses):
         train_images = get_set(images, is_train, True)
-        train_data = []
+        train_data = np.empty((len(train_images), self.bow_detector.descriptorSize()), dtype=np.float32)
         for i, img in enumerate(train_images):
             image = cv2.imread(img)
             features = self.detector.detect(image)
             des = self.bow_detector.compute(image, features)
-            train_data.append(des)
+            train_data = np.append(train_data, des, axis=0)
         return train_data, get_set(responses, is_train, True)
 
     def train_rtree(self, train_data, train_responses):
@@ -54,12 +54,13 @@ class BOWClassifier(object):
                             max_num_of_trees_in_the_forest=200,
                             term_crit=(cv2.TERM_CRITERIA_MAX_ITER, 1000, 1)
                             )
-        traind = np.array(train_data)
-        trainr = np.array(train_responses)
-        print traind
+        traind = train_data
+        trainr = np.array(train_responses, dtype=np.float32)
         rtree.train(
-            traind, cv2.CV_ROW_SAMPLE,
-            trainr, params=rtree_params
+            traind,
+            cv2.CV_ROW_SAMPLE,
+            trainr,
+            params=rtree_params
         )
         self.classifier = rtree
 
@@ -117,7 +118,7 @@ def calculate_missclassification(responses, predictions, total):
 
 
 if __name__ == '__main__':
-    classifier = BOWClassifier("SIFT", "SIFT", 2)
+    classifier = BOWClassifier("SIFT", "SIFT", 25)
     files, classes = get_files_in_folder("/home/blvp/Downloads/101_ObjectCategories")
     is_train_random = init_random_bool_vector(len(files), 0.5)
     print len(is_train_random) , "size of data set"
