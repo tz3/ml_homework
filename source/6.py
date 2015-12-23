@@ -2,7 +2,7 @@ __author__ = 'tz3'
 
 import cv2
 
-import config
+from config import config
 
 faceCascade = cv2.CascadeClassifier(config.HAARCASCADE)
 eye_cascade = cv2.CascadeClassifier(config.HAARCASCASE_EYE)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     h = int(cam.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
     # video doesn't play
     out = cv2.VideoWriter(
-        config.result_path("%s.mp4" % config.current_filename(__file__)), -1,
+        config.RESULT_PATH + "%s.mp4" % config.current_filename(__file__), -1,
         25,
         (w, h))
     while 1:

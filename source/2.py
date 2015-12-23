@@ -1,6 +1,6 @@
 import cv2
 
-import config
+from config import config
 
 img1 = cv2.imread(config.ORIGIN_IMAGE)
 imgray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)

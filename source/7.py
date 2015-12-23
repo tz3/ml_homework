@@ -7,7 +7,7 @@ __author__ = 'tz3'
 
 import cv2
 
-import config
+from config import config
 
 
 def filters():
